@@ -1,0 +1,233 @@
+@startuml
+title Diagrama de Clases - Videojuego RPG por Turnos (Patrones GoF)
+
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam shadowing false
+
+package "com.rpg.gof.model" {
+    interface Personaje <<Component>> {
+        + getNombre() : String
+        + getAtaque() : int
+        + getDefensa() : int
+        + getVelocidad() : int
+        + getHp() : int
+        + getHpMax() : int
+        + setHp(hp : int) : void
+        + getEstrategia() : EstrategiaAtaque
+        + setEstrategia(e : EstrategiaAtaque) : void
+        + atacar(objetivo : Personaje) : ResultadoAtaque
+        + getDescripcion() : String
+        + regenerarPorTurno() : int
+        + estaVivo() : boolean
+    }
+
+    class PersonajeBase <<ConcreteComponent>> {
+        - nombre : String
+        - hp : int
+        - hpMax : int
+        - ataque : int
+        - defensa : int
+        - velocidad : int
+        - estrategia : EstrategiaAtaque
+        + PersonajeBase(nombre, hpMax, ataque, defensa, velocidad, estrategia)
+        + atacar(objetivo : Personaje) : ResultadoAtaque
+        + getDescripcion() : String
+    }
+
+    class ResultadoAtaque <<ValueObject>> {
+        - dano : int
+        - critico : boolean
+        - efecto : String
+        + ResultadoAtaque(dano : int, critico : boolean, efecto : String)
+        + getDano() : int
+        + isCritico() : boolean
+        + getEfecto() : String
+    }
+}
+
+package "com.rpg.gof.strategy" {
+    interface EstrategiaAtaque <<Strategy>> {
+        + atacar(atacante : Personaje, objetivo : Personaje) : ResultadoAtaque
+        + getNombreEstrategia() : String
+    }
+
+    class AtaqueEspada <<ConcreteStrategy>> {
+        + atacar(atacante : Personaje, objetivo : Personaje) : ResultadoAtaque
+    }
+
+    class AtaqueHechizo <<ConcreteStrategy>> {
+        + atacar(atacante : Personaje, objetivo : Personaje) : ResultadoAtaque
+    }
+
+    class AtaqueFlecha <<ConcreteStrategy>> {
+        + atacar(atacante : Personaje, objetivo : Personaje) : ResultadoAtaque
+    }
+
+    class AtaquePunalada <<ConcreteStrategy>> {
+        + atacar(atacante : Personaje, objetivo : Personaje) : ResultadoAtaque
+    }
+
+    class AtaqueGarrote <<ConcreteStrategy>> {
+        + atacar(atacante : Personaje, objetivo : Personaje) : ResultadoAtaque
+    }
+
+    class AtaqueAlientoFuego <<ConcreteStrategy>> {
+        + atacar(atacante : Personaje, objetivo : Personaje) : ResultadoAtaque
+    }
+}
+
+package "com.rpg.gof.decorator" {
+    abstract class PersonajeDecorator <<Decorator>> {
+        # personaje : Personaje
+        # PersonajeDecorator(personaje : Personaje)
+        + atacar(objetivo : Personaje) : ResultadoAtaque
+        + regenerarPorTurno() : int
+    }
+
+    class EspadaDecorator <<ConcreteDecorator>> {
+        + getAtaque() : int
+        + getDescripcion() : String
+    }
+
+    class ArmaduraDecorator <<ConcreteDecorator>> {
+        + getDefensa() : int
+        + getDescripcion() : String
+    }
+
+    class VenenoDecorator <<ConcreteDecorator>> {
+        + getAtaque() : int
+        + getDescripcion() : String
+        + atacar(objetivo : Personaje) : ResultadoAtaque
+    }
+
+    class AmuletoRegeneracionDecorator <<ConcreteDecorator>> {
+        + getDefensa() : int
+        + getDescripcion() : String
+        + regenerar() : int
+        + regenerarPorTurno() : int
+    }
+
+    class BendicionDecorator <<ConcreteDecorator>> {
+        + getAtaque() : int
+        + getDefensa() : int
+        + getVelocidad() : int
+        + getDescripcion() : String
+    }
+}
+
+package "com.rpg.gof.factory" {
+    abstract class CreadorPersonaje <<Creator>> {
+        + {abstract} crearPersonaje(nombre : String) : Personaje
+        # validarNombre(nombre : String) : void
+    }
+
+    class CreadorGuerrero <<ConcreteCreator>> {
+        + crearPersonaje(nombre : String) : Personaje
+    }
+
+    class CreadorMago <<ConcreteCreator>> {
+        + crearPersonaje(nombre : String) : Personaje
+    }
+
+    class CreadorArquero <<ConcreteCreator>> {
+        + crearPersonaje(nombre : String) : Personaje
+    }
+
+    class CreadorPicaro <<ConcreteCreator>> {
+        + crearPersonaje(nombre : String) : Personaje
+    }
+
+    abstract class CreadorEnemigo <<Creator>> {
+        + {abstract} crearEnemigo() : Personaje
+    }
+
+    class CreadorGoblin <<ConcreteCreator>> {
+        + crearEnemigo() : Personaje
+    }
+
+    class CreadorOrco <<ConcreteCreator>> {
+        + crearEnemigo() : Personaje
+    }
+
+    class CreadorDragon <<ConcreteCreator>> {
+        + crearEnemigo() : Personaje
+    }
+}
+
+package "com.rpg.gof.observer" {
+    interface ObservadorCombate <<Observer>> {
+        + onInicioCombate(heroe : Personaje, enemigo : Personaje) : void
+        + onTurnoEjecutado(numeroTurno : int, atacante : Personaje, defensor : Personaje, resultado : ResultadoAtaque) : void
+        + onGolpeCritico(atacante : Personaje, defensor : Personaje, resultado : ResultadoAtaque) : void
+        + onRegeneracion(personaje : Personaje, puntosRegenerados : int, hpActual : int, hpMax : int) : void
+        + onFinCombate(ganador : Personaje, perdedor : Personaje, totalTurnos : int) : void
+    }
+
+    class BitacoraCombate <<ConcreteObserver>> {
+        - historial : List<String>
+        + getHistorial() : List<String>
+    }
+}
+
+package "com.rpg.gof.engine" {
+    class MotorCombate <<Subject>> {
+        - observadores : List<ObservadorCombate>
+        + agregarObservador(observador : ObservadorCombate) : void
+        + eliminarObservador(observador : ObservadorCombate) : void
+        + iniciarCombate(heroe : Personaje, enemigo : Personaje) : Personaje
+    }
+}
+
+package "com.rpg.gof" {
+    class Main {
+        + {static} main(args : String[]) : void
+    }
+}
+
+' Relaciones Model y Strategy
+PersonajeBase ..|> Personaje
+PersonajeBase o--> "1" EstrategiaAtaque : estrategia
+Personaje ..> ResultadoAtaque : retorna
+EstrategiaAtaque ..> ResultadoAtaque : crea
+AtaqueEspada ..|> EstrategiaAtaque
+AtaqueHechizo ..|> EstrategiaAtaque
+AtaqueFlecha ..|> EstrategiaAtaque
+AtaquePunalada ..|> EstrategiaAtaque
+AtaqueGarrote ..|> EstrategiaAtaque
+AtaqueAlientoFuego ..|> EstrategiaAtaque
+
+' Relaciones Decorator
+PersonajeDecorator ..|> Personaje
+PersonajeDecorator o--> "1" Personaje : envuelve
+EspadaDecorator --|> PersonajeDecorator
+ArmaduraDecorator --|> PersonajeDecorator
+VenenoDecorator --|> PersonajeDecorator
+AmuletoRegeneracionDecorator --|> PersonajeDecorator
+BendicionDecorator --|> PersonajeDecorator
+
+' Relaciones Factory Method
+CreadorGuerrero --|> CreadorPersonaje
+CreadorMago --|> CreadorPersonaje
+CreadorArquero --|> CreadorPersonaje
+CreadorPicaro --|> CreadorPersonaje
+CreadorGoblin --|> CreadorEnemigo
+CreadorOrco --|> CreadorEnemigo
+CreadorDragon --|> CreadorEnemigo
+CreadorPersonaje ..> Personaje : crea
+CreadorEnemigo ..> Personaje : crea
+
+' Relaciones Observer y Engine
+BitacoraCombate ..|> ObservadorCombate
+MotorCombate o--> "*" ObservadorCombate : notifica
+MotorCombate ..> Personaje : coordina
+
+' Relaciones Main
+Main ..> MotorCombate
+Main ..> BitacoraCombate
+Main ..> CreadorPersonaje
+Main ..> CreadorEnemigo
+Main ..> PersonajeDecorator
+
+@enduml

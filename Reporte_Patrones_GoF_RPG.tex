@@ -1,0 +1,696 @@
+\documentclass[12pt,letterpaper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{hyperref}
+
+\definecolor{uabcGreen}{RGB}{0, 102, 51}
+\definecolor{uabcGold}{RGB}{184, 134, 11}
+\definecolor{codeBg}{RGB}{248, 249, 250}
+\definecolor{codeBorder}{RGB}{210, 215, 220}
+\definecolor{codeKeyword}{RGB}{0, 82, 164}
+\definecolor{codeComment}{RGB}{106, 115, 125}
+\definecolor{codeString}{RGB}{34, 134, 58}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=uabcGreen,
+    urlcolor=codeKeyword,
+    pdftitle={Arquitectura de Videojuego RPG por Turnos con Patrones GoF},
+    pdfauthor={Adad Arias Palma}
+}
+
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    backgroundcolor=\color{codeBg},
+    frame=single,
+    rulecolor=\color{codeBorder},
+    breaklines=true,
+    breakatwhitespace=false,
+    numbers=left,
+    numberstyle=\tiny\color{codeComment},
+    stepnumber=1,
+    numbersep=8pt,
+    tabsize=4,
+    showstringspaces=false,
+    keywordstyle=\color{codeKeyword}\bfseries,
+    commentstyle=\color{codeComment}\itshape,
+    stringstyle=\color{codeString},
+    literate=
+        {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+        {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+        {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {¡}{{!`}}1 {¿}{{?`}}1
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{codeComment} Análisis y Diseño de Sistemas -- Patrones GoF en Java}
+\fancyhead[R]{\small\color{codeComment} UABC -- Facultad de Ingeniería}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\section}{\Large\bfseries\color{uabcGreen}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\large\bfseries\color{black}}{\thesubsection}{0.5em}{}
+
+\begin{document}
+
+% ==============================================================================
+% PORTADA INSTITUCIONAL
+% ==============================================================================
+\begin{titlepage}
+    \centering
+    \vspace*{0.8cm}
+
+    {\LARGE \bfseries \color{uabcGreen} UNIVERSIDAD AUTÓNOMA DE BAJA CALIFORNIA \par}
+    \vspace{0.3cm}
+    {\Large \bfseries FACULTAD DE INGENIERÍA \par}
+    \vspace{0.2cm}
+    {\large Programa de Ingeniería en Computación / Software \par}
+
+    \vspace{1.2cm}
+    \rule{\textwidth}{1.5pt}
+    \vspace{0.6cm}
+
+    {\Large \textbf{Reporte Técnico de Arquitectura de Software} \par}
+    \vspace{0.4cm}
+    {\huge \bfseries Diseño e Implementación de un Videojuego RPG por Turnos Aplicando Patrones de Diseño GoF \par}
+    \vspace{0.4cm}
+    {\normalsize \textit{Factory Method, Strategy, Decorator y Observer en Java 17 / Maven (Apache NetBeans 23)} \par}
+
+    \vspace{0.6cm}
+    \rule{\textwidth}{1.5pt}
+
+    \vspace{1.8cm}
+    \begin{tabular}{rl}
+        \textbf{Asignatura:}  & Análisis y Diseño de Sistemas \\[0.3cm]
+        \textbf{Alumno:}      & Adad Arias Palma \\[0.3cm]
+        \textbf{Matrícula:}   & 1196869 \\[0.3cm]
+        \textbf{Profesor:}    & Jose Martin Olguin Espinoza \\[0.3cm]
+        \textbf{Ciclo:}       & 2026-2 \\[0.3cm]
+        \textbf{Repositorio:} & \url{https://github.com/AdadAriasPalma/rpg-patrones-gof} \\
+    \end{tabular}
+
+    \vfill
+    {\large Mexicali, Baja California, México \par}
+    {\normalsize Ciclo Escolar 2026-2 \par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ==============================================================================
+% SECCIÓN 1: CONTEXTO Y ARQUITECTURA GENERAL
+% ==============================================================================
+\section{Contexto y Arquitectura General}
+
+El presente proyecto implementa desde cero un videojuego de rol (RPG) por turnos en consola bajo el estándar \textbf{Apache Maven} (\texttt{com.rpg.gof:rpg-patrones-gof:1.0.0}), compilado con Java 17, codificación UTF-8 y configurado con \texttt{exec-maven-plugin} (\texttt{3.1.0}) para su ejecución inmediata en \textbf{Apache NetBeans IDE 23} o mediante línea de comandos. El código fuente completo y sus artefactos se encuentran alojados en el repositorio público de GitHub: \url{https://github.com/AdadAriasPalma/rpg-patrones-gof}.
+
+El objetivo arquitectónico central consiste en evitar el acoplamiento rígido típico de las jerarquías monolíticas en videojuegos (explosión de subclases por combinaciones de clase de héroe, tipo de ataque y equipamiento) y separar por completo la lógica determinista de combate respecto al mecanismo de registro o interfaz de salida. Para ello, el sistema se organiza en siete paquetes cohesivos con responsabilidades claramente delimitadas:
+
+\begin{table}[H]
+    \centering
+    \caption{Distribución modular por paquetes del proyecto \texttt{rpg-patrones-gof}.}
+    \label{tab:paquetes}
+    \begin{tabular}{>{\ttfamily}l l p{6.8cm}}
+        \toprule
+        \normalfont\textbf{Paquete} & \textbf{Rol Arquitectónico} & \textbf{Componentes Principales} \\
+        \midrule
+        com.rpg.gof.model     & Modelo de Dominio   & \texttt{Personaje}, \texttt{PersonajeBase}, \texttt{ResultadoAtaque}. \\
+        com.rpg.gof.strategy  & Patrón Strategy     & \texttt{EstrategiaAtaque} y 6 estrategias concretas deterministas (\texttt{AtaqueEspada}, \texttt{AtaqueHechizo}, \texttt{AtaqueFlecha}, \texttt{AtaquePunalada}, \texttt{AtaqueGarrote}, \texttt{AtaqueAlientoFuego}). \\
+        com.rpg.gof.factory   & Patrón Factory Method & \texttt{CreadorPersonaje} (Guerrero, Mago, Arquero, Pícaro) y \texttt{CreadorEnemigo} (Goblin, Orco, Dragón). \\
+        com.rpg.gof.decorator & Patrón Decorator    & \texttt{PersonajeDecorator} y 5 decoradores apilables (\texttt{Espada}, \texttt{Armadura}, \texttt{Veneno}, \texttt{AmuletoRegeneracion}, \texttt{Bendicion}). \\
+        com.rpg.gof.observer  & Patrón Observer     & \texttt{ObservadorCombate} y \texttt{BitacoraCombate}. \\
+        com.rpg.gof.engine    & Motor / Subject     & \texttt{MotorCombate}. \\
+        com.rpg.gof           & Cliente / Orquestador & \texttt{Main} (ejecución de las 3 corridas de prueba). \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Todas las fórmulas de combate fueron diseñadas de forma determinista con el fin de garantizar la reproducibilidad exacta de los escenarios de prueba y facilitar la verificación matemática de cada turno.
+
+% ==============================================================================
+% SECCIÓN 2: JUSTIFICACIÓN DE PATRONES GOF Y PRINCIPIOS SOLID
+% ==============================================================================
+\section{Justificación de Patrones GoF y Principios SOLID}
+
+\subsection{Patrón Strategy (\texttt{com.rpg.gof.strategy})}
+\textbf{Problema que resuelve:} En un RPG, los distintos combatientes emplean mecánicas ofensivas heterogéneas (ataques cuerpo a cuerpo mitigados por armadura, hechizos arcanos que ignoran dos tercios de la defensa, flechas perforantes que ignoran la mitad, o puñaladas sigilosas que escalan con la velocidad). Codificar estas variantes mediante condicionales (\texttt{if/switch}) dentro de \texttt{PersonajeBase} violaría el principio Abierto/Cerrado.
+
+\textbf{Solución aplicada:} Se define la interfaz \texttt{EstrategiaAtaque} con el contrato \texttt{atacar(Personaje atacante, Personaje objetivo)} retornando un objeto de valor inmutable \texttt{ResultadoAtaque}. Cada algoritmo reside en su propia clase concreta, permitiendo intercambiar la estrategia de un combatiente en tiempo de ejecución mediante \texttt{setEstrategia(...)}.
+
+\subsection{Patrón Factory Method (\texttt{com.rpg.gof.factory})}
+\textbf{Problema que resuelve:} Instanciar directamente \texttt{PersonajeBase} desde la capa cliente obligaría a conocer los valores exactos de HP, ataque, defensa, velocidad y la estrategia asociada a cada arquetipo de héroe o monstruo, dispersando reglas de balanceo por todo el código.
+
+\textbf{Solución aplicada:} Se establecen dos jerarquías de creadores abstractos: \texttt{CreadorPersonaje} (con el método fábrica \texttt{crearPersonaje(String)} y el \textit{hook} \texttt{validarNombre(String)}) y \texttt{CreadorEnemigo} (con \texttt{crearEnemigo()}). Cada subclase concreta encapsula la configuración oficial de estadísticas y la estrategia inicial correspondiente.
+
+\subsection{Patrón Decorator (\texttt{com.rpg.gof.decorator})}
+\textbf{Problema que resuelve:} Si un héroe puede equipar combinaciones arbitrarias de espada, armadura, veneno, amuleto de regeneración y bendición, modelar esto con herencia generaría una explosión combinatoria ($2^5 = 32$ subclases por cada clase de héroe).
+
+\textbf{Solución aplicada:} \texttt{PersonajeDecorator} implementa \texttt{Personaje} y envuelve a una instancia \texttt{protected final Personaje personaje}. Los decoradores concretos extienden esta base y modifican los atributos o comportamientos de forma acumulativa y en cualquier orden de anidamiento:
+\begin{itemize}
+    \item \texttt{EspadaDecorator}: incrementa el ataque en $+10$.
+    \item \texttt{ArmaduraDecorator}: incrementa la defensa en $+8$.
+    \item \texttt{VenenoDecorator}: añade $+5$ de ataque, suma $+5$ de daño al resultado de \texttt{atacar()} y concatena \texttt{" + veneno"} al efecto.
+    \item \texttt{AmuletoRegeneracionDecorator}: aporta $+3$ de defensa y regenera $+2$ HP por turno sin superar \texttt{hpMax}.
+    \item \texttt{BendicionDecorator}: multiplica ataque ($\times 1.15$ truncado), defensa ($\times 1.15$ redondeado) y velocidad ($\times 1.15$ truncado).
+\end{itemize}
+
+\textbf{Consideración crítica de diseño:} Al combinar \texttt{Decorator} con \texttt{Strategy}, si \texttt{PersonajeBase.atacar()} pasara \texttt{this} a la estrategia, la fórmula perdería los bonos de los decoradores externos. Para resolverlo con total independencia del orden de envoltura, \texttt{PersonajeDecorator} emplea un contexto \texttt{ThreadLocal<Personaje>} que conserva la referencia al decorador más externo mientras la llamada desciende hacia el componente base y atraviesa decoradores intermedios como \texttt{VenenoDecorator}.
+
+\subsection{Patrón Observer (\texttt{com.rpg.gof.observer} y \texttt{com.rpg.gof.engine})}
+\textbf{Problema que resuelve:} Acoplar el ciclo de combate a \texttt{System.out.println} impediría reutilizar el motor en una interfaz gráfica (Swing/JavaFX), un servidor web o pruebas automatizadas en memoria.
+
+\textbf{Solución aplicada:} \texttt{MotorCombate} actúa como \textit{Subject} manteniendo una lista de \texttt{ObservadorCombate}. Durante el ciclo de turnos emite eventos estructurados (\texttt{onInicioCombate}, \texttt{onTurnoEjecutado}, \texttt{onGolpeCritico}, \texttt{onRegeneracion} y \texttt{onFinCombate}). \texttt{BitacoraCombate} implementa dicha interfaz para formatear la salida en consola y simultáneamente conservar el historial en memoria.
+
+\subsection{Alineación con Principios SOLID}
+
+\begin{table}[H]
+    \centering
+    \caption{Correspondencia entre los principios SOLID y las decisiones arquitectónicas del proyecto.}
+    \begin{tabular}{l p{10.5cm}}
+        \toprule
+        \textbf{Principio} & \textbf{Evidencia en la Arquitectura} \\
+        \midrule
+        \textbf{S} -- Responsabilidad Única & Cada clase cumple un único propósito: \texttt{MotorCombate} solo orquesta turnos, \texttt{BitacoraCombate} solo registra eventos, cada \texttt{EstrategiaAtaque} encapsula una sola fórmula y cada \texttt{Creador} instancia un único arquetipo. \\
+        \textbf{O} -- Abierto / Cerrado & Pueden agregarse nuevas clases de héroe, enemigos, estrategias, decoradores u observadores sin modificar las clases existentes ni el núcleo de \texttt{MotorCombate}. \\
+        \textbf{L} -- Sustitución de Liskov & Todo decorador concreto y \texttt{PersonajeBase} implementan íntegramente el contrato \texttt{Personaje}, siendo completamente intercambiables ante \texttt{MotorCombate}. \\
+        \textbf{I} -- Segregación de Interfaces & Se definen interfaces focalizadas y cohesivas (\texttt{EstrategiaAtaque} con un método principal, \texttt{ObservadorCombate} orientada exclusivamente a eventos de combate). \\
+        \textbf{D} -- Inversión de Dependencias & \texttt{MotorCombate} depende de las abstracciones \texttt{Personaje} y \texttt{ObservadorCombate}; \texttt{PersonajeBase} depende de la abstracción \texttt{EstrategiaAtaque}; \texttt{Main} depende de las fábricas abstractas \texttt{CreadorPersonaje} y \texttt{CreadorEnemigo}. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% ==============================================================================
+% SECCIÓN 3: DIAGRAMAS UML
+% ==============================================================================
+\section{Diagramas UML}
+
+Los diagramas fueron modelados formalmente en \textbf{PlantUML} dentro del directorio \texttt{diagramas/} para documentar tanto la vista estructural (clases, interfaces y dependencias entre los cuatro patrones) como la vista dinámica (secuencia completa de creación, decoración y ejecución de combate).
+
+\subsection{Diagrama de Clases}
+
+\begin{figure}[H]
+    \centering
+    \IfFileExists{diagramas/diagrama_clases.png}{
+        \includegraphics[width=\textwidth]{diagramas/diagrama_clases.png}
+    }{
+        \fbox{\parbox{0.92\textwidth}{\centering\vspace{1cm}
+            \textbf{[Figura reservada: \texttt{diagramas/diagrama\_clases.png}]}\\[0.25cm]
+            \small Para incluir la imagen compilada, renderice el archivo \texttt{diagramas/diagrama\_clases.puml} con PlantUML y guárdelo en la ruta indicada.
+            \vspace{1cm}}}
+    }
+    \caption{Diagrama de clases completo integrando los patrones Factory Method, Strategy, Decorator y Observer.}
+    \label{fig:diagrama_clases}
+\end{figure}
+
+\begin{lstlisting}[caption={Código fuente PlantUML del Diagrama de Clases (\texttt{diagramas/diagrama\_clases.puml}).}]
+@startuml
+title Diagrama de Clases - Videojuego RPG por Turnos (Patrones GoF)
+
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam shadowing false
+
+package "com.rpg.gof.model" {
+    interface Personaje <<Component>> {
+        + getNombre() : String
+        + getAtaque() : int
+        + getDefensa() : int
+        + getVelocidad() : int
+        + getHp() : int
+        + getHpMax() : int
+        + setHp(hp : int) : void
+        + getEstrategia() : EstrategiaAtaque
+        + setEstrategia(e : EstrategiaAtaque) : void
+        + atacar(objetivo : Personaje) : ResultadoAtaque
+        + getDescripcion() : String
+        + regenerarPorTurno() : int
+        + estaVivo() : boolean
+    }
+
+    class PersonajeBase <<ConcreteComponent>> {
+        - nombre : String
+        - hp : int
+        - hpMax : int
+        - ataque : int
+        - defensa : int
+        - velocidad : int
+        - estrategia : EstrategiaAtaque
+        + PersonajeBase(nombre, hpMax, ataque, defensa, velocidad, estrategia)
+        + atacar(objetivo : Personaje) : ResultadoAtaque
+        + getDescripcion() : String
+    }
+
+    class ResultadoAtaque <<ValueObject>> {
+        - dano : int
+        - critico : boolean
+        - efecto : String
+        + ResultadoAtaque(dano : int, critico : boolean, efecto : String)
+        + getDano() : int
+        + isCritico() : boolean
+        + getEfecto() : String
+    }
+}
+
+package "com.rpg.gof.strategy" {
+    interface EstrategiaAtaque <<Strategy>> {
+        + atacar(atacante : Personaje, objetivo : Personaje) : ResultadoAtaque
+        + getNombreEstrategia() : String
+    }
+    class AtaqueEspada <<ConcreteStrategy>>
+    class AtaqueHechizo <<ConcreteStrategy>>
+    class AtaqueFlecha <<ConcreteStrategy>>
+    class AtaquePunalada <<ConcreteStrategy>>
+    class AtaqueGarrote <<ConcreteStrategy>>
+    class AtaqueAlientoFuego <<ConcreteStrategy>>
+}
+
+package "com.rpg.gof.decorator" {
+    abstract class PersonajeDecorator <<Decorator>> {
+        # personaje : Personaje
+        # PersonajeDecorator(personaje : Personaje)
+        + atacar(objetivo : Personaje) : ResultadoAtaque
+        + regenerarPorTurno() : int
+    }
+    class EspadaDecorator <<ConcreteDecorator>>
+    class ArmaduraDecorator <<ConcreteDecorator>>
+    class VenenoDecorator <<ConcreteDecorator>>
+    class AmuletoRegeneracionDecorator <<ConcreteDecorator>>
+    class BendicionDecorator <<ConcreteDecorator>>
+}
+
+package "com.rpg.gof.factory" {
+    abstract class CreadorPersonaje <<Creator>> {
+        + {abstract} crearPersonaje(nombre : String) : Personaje
+        # validarNombre(nombre : String) : void
+    }
+    class CreadorGuerrero <<ConcreteCreator>>
+    class CreadorMago <<ConcreteCreator>>
+    class CreadorArquero <<ConcreteCreator>>
+    class CreadorPicaro <<ConcreteCreator>>
+
+    abstract class CreadorEnemigo <<Creator>> {
+        + {abstract} crearEnemigo() : Personaje
+    }
+    class CreadorGoblin <<ConcreteCreator>>
+    class CreadorOrco <<ConcreteCreator>>
+    class CreadorDragon <<ConcreteCreator>>
+}
+
+package "com.rpg.gof.observer" {
+    interface ObservadorCombate <<Observer>> {
+        + onInicioCombate(heroe : Personaje, enemigo : Personaje) : void
+        + onTurnoEjecutado(numeroTurno : int, atacante : Personaje, defensor : Personaje, resultado : ResultadoAtaque) : void
+        + onGolpeCritico(atacante : Personaje, defensor : Personaje, resultado : ResultadoAtaque) : void
+        + onRegeneracion(personaje : Personaje, puntosRegenerados : int, hpActual : int, hpMax : int) : void
+        + onFinCombate(ganador : Personaje, perdedor : Personaje, totalTurnos : int) : void
+    }
+    class BitacoraCombate <<ConcreteObserver>> {
+        - historial : List<String>
+        + getHistorial() : List<String>
+    }
+}
+
+package "com.rpg.gof.engine" {
+    class MotorCombate <<Subject>> {
+        - observadores : List<ObservadorCombate>
+        + agregarObservador(observador : ObservadorCombate) : void
+        + eliminarObservador(observador : ObservadorCombate) : void
+        + iniciarCombate(heroe : Personaje, enemigo : Personaje) : Personaje
+    }
+}
+
+PersonajeBase ..|> Personaje
+PersonajeBase o--> "1" EstrategiaAtaque : estrategia
+PersonajeDecorator ..|> Personaje
+PersonajeDecorator o--> "1" Personaje : envuelve
+EspadaDecorator --|> PersonajeDecorator
+ArmaduraDecorator --|> PersonajeDecorator
+VenenoDecorator --|> PersonajeDecorator
+AmuletoRegeneracionDecorator --|> PersonajeDecorator
+BendicionDecorator --|> PersonajeDecorator
+BitacoraCombate ..|> ObservadorCombate
+MotorCombate o--> "*" ObservadorCombate : notifica
+@enduml
+\end{lstlisting}
+
+\subsection{Diagrama de Secuencia}
+
+\begin{figure}[H]
+    \centering
+    \IfFileExists{diagramas/diagrama_secuencia.png}{
+        \includegraphics[width=\textwidth]{diagramas/diagrama_secuencia.png}
+    }{
+        \fbox{\parbox{0.92\textwidth}{\centering\vspace{1cm}
+            \textbf{[Figura reservada: \texttt{diagramas/diagrama\_secuencia.png}]}\\[0.25cm]
+            \small Para incluir la imagen compilada, renderice el archivo \texttt{diagramas/diagrama\_secuencia.puml} con PlantUML y guárdelo en la ruta indicada.
+            \vspace{1cm}}}
+    }
+    \caption{Diagrama de secuencia del flujo de creación, decoración en cadena y ejecución de turno.}
+    \label{fig:diagrama_secuencia}
+\end{figure}
+
+\begin{lstlisting}[caption={Código fuente PlantUML del Diagrama de Secuencia (\texttt{diagramas/diagrama\_secuencia.puml}).}]
+@startuml
+title Diagrama de Secuencia - Creación (Factory), Equipamiento (Decorator) y Turno de Combate (Strategy + Observer)
+
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor Usuario
+participant "Main" as Main
+participant "fabHeroe : CreadorPicaro" as FabHeroe
+participant "fabEnemigo : CreadorDragon" as FabEnemigo
+participant "sombraBase : PersonajeBase" as Base
+participant "espada : EspadaDecorator" as Espada
+participant "veneno : VenenoDecorator" as Veneno
+participant "sombra : BendicionDecorator" as Bendicion
+participant "estrategia : AtaquePunalada" as Estrategia
+participant "motor : MotorCombate" as Motor
+participant "bitacora : BitacoraCombate" as Bitacora
+
+== Fase 1: Creación mediante Factory Method ==
+Usuario -> Main : main(args)
+Main -> FabHeroe : crearPersonaje("Sombra")
+activate FabHeroe
+FabHeroe -> FabHeroe : validarNombre("Sombra")
+FabHeroe -> Base ** : new PersonajeBase("Sombra", 105, 26, 12, 22, AtaquePunalada)
+FabHeroe --> Main : sombraBase
+deactivate FabHeroe
+
+Main -> FabEnemigo : crearEnemigo()
+activate FabEnemigo
+FabEnemigo --> Main : dragon ("Dragón ancestral")
+deactivate FabEnemigo
+
+== Fase 2: Equipamiento Dinámico en Cadena (Decorator) ==
+Main -> Espada ** : new EspadaDecorator(sombraBase)
+Main -> Veneno ** : new VenenoDecorator(espada)
+Main -> Bendicion ** : new BendicionDecorator(veneno)
+
+== Fase 3: Registro de Observador e Inicio de Combate (Observer) ==
+Main -> Motor : agregarObservador(bitacora)
+Main -> Motor : iniciarCombate(sombra, dragon)
+activate Motor
+Motor -> Bitacora : onInicioCombate(sombra, dragon)
+activate Bitacora
+Bitacora --> Motor : imprime fichas iniciales e iniciativa
+deactivate Bitacora
+
+== Fase 4: Ejecución de Turno (Decorator + Strategy + Observer) ==
+loop mientras ambos personajes estén vivos
+    Motor -> Bendicion : atacar(dragon)
+    activate Bendicion
+    Bendicion -> Veneno : atacar(dragon)
+    activate Veneno
+    Veneno -> Espada : atacar(dragon)
+    activate Espada
+    Espada -> Base : getEstrategia()
+    Base --> Espada : estrategia
+    Espada -> Estrategia : atacar(sombra, dragon)
+    activate Estrategia
+    Estrategia -> Bendicion : getAtaque() / getVelocidad()
+    Bendicion --> Estrategia : ATK=47, VEL=25 (>=20 -> Crítico)
+    Estrategia --> Espada : ResultadoAtaque(43, true, "puñalada furtiva")
+    deactivate Estrategia
+    Espada --> Veneno : ResultadoAtaque(43, true, "puñalada furtiva")
+    deactivate Espada
+    Veneno --> Bendicion : ResultadoAtaque(48, true, "puñalada furtiva + veneno")
+    deactivate Veneno
+    Bendicion --> Motor : ResultadoAtaque(48, true, "puñalada furtiva + veneno")
+    deactivate Bendicion
+
+    Motor -> Motor : dragon.setHp(hp - 48)
+    Motor -> Bitacora : onGolpeCritico(sombra, dragon, resultado)
+    Motor -> Bitacora : onTurnoEjecutado(turno, sombra, dragon, resultado)
+    Motor -> Bendicion : regenerarPorTurno()
+    Bendicion --> Motor : 0 (sin amuleto)
+end
+
+Motor -> Bitacora : onFinCombate(sombra, dragon, totalTurnos)
+activate Bitacora
+Bitacora --> Motor : imprime resumen y banner ¡VICTORIA PARA SOMBRA!
+deactivate Bitacora
+
+Motor --> Main : ganador (sombra)
+deactivate Motor
+@enduml
+\end{lstlisting}
+
+% ==============================================================================
+% SECCIÓN 4: FRAGMENTOS CLAVE DE IMPLEMENTACIÓN
+% ==============================================================================
+\section{Fragmentos Clave de Implementación}
+
+A continuación se presentan los fragmentos representativos que materializan los contratos e interacciones críticas de cada patrón en Java 17.
+
+\subsection{Strategy: \texttt{AtaquePunalada.java}}
+\begin{lstlisting}[language=Java, caption={Estrategia determinista con evaluación de golpe crítico por velocidad.}]
+public class AtaquePunalada implements EstrategiaAtaque {
+
+    private static final int UMBRAL_VELOCIDAD_CRITICA = 20;
+
+    @Override
+    public ResultadoAtaque atacar(Personaje atacante, Personaje objetivo) {
+        int danoBase = Math.max(1, atacante.getAtaque() - objetivo.getDefensa());
+        boolean critico = atacante.getVelocidad() >= UMBRAL_VELOCIDAD_CRITICA;
+        int danoFinal = critico ? Math.max(1, (int) (danoBase * 1.5)) : danoBase;
+        return new ResultadoAtaque(danoFinal, critico, "puñalada furtiva");
+    }
+}
+\end{lstlisting}
+
+\subsection{Factory Method: \texttt{CreadorPersonaje.java} y \texttt{CreadorPicaro.java}}
+\begin{lstlisting}[language=Java, caption={Creador abstracto con hook de validación y fábrica concreta de Pícaro.}]
+public abstract class CreadorPersonaje {
+    public abstract Personaje crearPersonaje(String nombre);
+
+    protected void validarNombre(String nombre) {
+        if (nombre == null || nombre.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre del héroe no puede ser nulo o vacío.");
+        }
+    }
+}
+
+public class CreadorPicaro extends CreadorPersonaje {
+    @Override
+    public Personaje crearPersonaje(String nombre) {
+        validarNombre(nombre);
+        return new PersonajeBase(nombre.trim(), 105, 26, 12, 22, new AtaquePunalada());
+    }
+}
+\end{lstlisting}
+
+\subsection{Decorator: \texttt{PersonajeDecorator.java} y \texttt{VenenoDecorator.java}}
+\begin{lstlisting}[language=Java, caption={Propagación del decorador externo hacia la estrategia y adición de daño por veneno.}]
+public abstract class PersonajeDecorator implements Personaje {
+    private static final ThreadLocal<Personaje> ATACANTE_DECORADO = new ThreadLocal<>();
+    protected final Personaje personaje;
+
+    @Override
+    public ResultadoAtaque atacar(Personaje objetivo) {
+        Objects.requireNonNull(objetivo, "El objetivo del ataque no puede ser nulo.");
+        boolean esExterior = (ATACANTE_DECORADO.get() == null);
+        if (esExterior) {
+            ATACANTE_DECORADO.set(this);
+        }
+        try {
+            if (personaje instanceof PersonajeDecorator) {
+                return personaje.atacar(objetivo);
+            }
+            return personaje.getEstrategia().atacar(ATACANTE_DECORADO.get(), objetivo);
+        } finally {
+            if (esExterior) {
+                ATACANTE_DECORADO.remove();
+            }
+        }
+    }
+}
+
+public class VenenoDecorator extends PersonajeDecorator {
+    @Override
+    public int getAtaque() {
+        return personaje.getAtaque() + 5;
+    }
+
+    @Override
+    public ResultadoAtaque atacar(Personaje objetivo) {
+        ResultadoAtaque resultadoBase = super.atacar(objetivo);
+        return new ResultadoAtaque(
+                resultadoBase.getDano() + 5,
+                resultadoBase.isCritico(),
+                resultadoBase.getEfecto() + " + veneno"
+        );
+    }
+}
+\end{lstlisting}
+
+\subsection{Observer y Motor: \texttt{MotorCombate.java}}
+\begin{lstlisting}[language=Java, caption={Orquestación de turnos y notificación desacoplada a observadores.}]
+public Personaje iniciarCombate(Personaje heroe, Personaje enemigo) {
+    notificarInicioCombate(heroe, enemigo);
+
+    Personaje primero = heroe.getVelocidad() >= enemigo.getVelocidad() ? heroe : enemigo;
+    Personaje segundo = (primero == heroe) ? enemigo : heroe;
+
+    int numeroTurno = 0;
+    while (heroe.estaVivo() && enemigo.estaVivo()) {
+        numeroTurno++;
+        ejecutarAccion(numeroTurno, primero, segundo);
+        if (segundo.estaVivo()) {
+            ejecutarAccion(numeroTurno, segundo, primero);
+        }
+    }
+
+    Personaje ganador = heroe.estaVivo() ? heroe : enemigo;
+    Personaje perdedor = (ganador == heroe) ? enemigo : heroe;
+    notificarFinCombate(ganador, perdedor, numeroTurno);
+    return ganador;
+}
+\end{lstlisting}
+
+% ==============================================================================
+% SECCIÓN 5: EVIDENCIA DE EJECUCIÓN
+% ==============================================================================
+\section{Evidencia de Ejecución}
+
+El proyecto se compiló y ejecutó mediante Maven (\texttt{mvn clean compile exec:java}) generando el archivo \texttt{EJECUCION.txt}. La Tabla~\ref{tab:resumen_corridas} resume los resultados deterministas verificados en las tres corridas.
+
+\begin{table}[H]
+    \centering
+    \caption{Resumen cuantitativo de las tres corridas ejecutadas en \texttt{Main.java}.}
+    \label{tab:resumen_corridas}
+    \begin{tabular}{llccccc}
+        \toprule
+        \textbf{Corrida} & \textbf{Enfrentamiento} & \textbf{Turnos} & \textbf{Daño Total} & \textbf{Críticos} & \textbf{HP Regen.} & \textbf{Ganador (HP)} \\
+        \midrule
+        1 & Aria vs Goblin salvaje     & 2 & 91  & 0 & 0  & Aria (99/100) \\
+        2 & Kael vs Orco brutal        & 6 & 168 & 0 & 10 & Kael (120/140) \\
+        3 & Sombra vs Dragón ancestral & 4 & 273 & 4 & 0  & Sombra (24/105) \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Salida Real Capturada (\texttt{EJECUCION.txt})}
+
+\begin{lstlisting}[caption={Salida íntegra generada al compilar y ejecutar el proyecto con Maven.}]
+[INFO] --- compiler:3.13.0:compile (default-compile) @ rpg-patrones-gof ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 29 source files with javac [debug target 17] to target\classes
+[INFO] --- exec:3.1.0:java (default-cli) @ rpg-patrones-gof ---
+
+################################################################################
+CORRIDA 1: Aria (Mago) + Espada + Veneno + Bendición vs Goblin salvaje
+################################################################################
+================================================================================
+                         INICIO DEL COMBATE POR TURNOS                          
+================================================================================
+HÉROE   | Aria (base) + Espada + Veneno + Bendición        | HP:100/100 | ATK:40 | DEF:12 | VEL:17 | Estrategia: AtaqueHechizo
+ENEMIGO | Goblin salvaje (base)                            | HP: 60/ 60 | ATK:13 | DEF: 2 | VEL:14 | Estrategia: AtaquePunalada
+--------------------------------------------------------------------------------
+Orden de iniciativa por velocidad: Aria ataca primero.
+--------------------------------------------------------------------------------
+[Turno 01] Aria             ejecuta "hechizo arcano + veneno"    -> 45 de daño | Goblin salvaje HP: 15/60
+[Turno 01] Goblin salvaje   ejecuta "puñalada furtiva"           ->  1 de daño | Aria HP: 99/100
+[Turno 02] Aria             ejecuta "hechizo arcano + veneno"    -> 45 de daño | Goblin salvaje HP: 0/60
+--------------------------------------------------------------------------------
+RESUMEN DEL COMBATE:
+  - Turnos transcurridos : 2
+  - Daño total acumulado : 91
+  - Golpes críticos      : 0
+  - HP total regenerado  : 0
+  - Estado del ganador   : Aria (base) + Espada + Veneno + Bendición (HP 99/100)
+  - Estado del derrotado : Goblin salvaje (HP 0/60)
+********************************************************************************
+                 ¡VICTORIA PARA ARIA!
+********************************************************************************
+
+################################################################################
+CORRIDA 2: Kael (Guerrero) + Espada + Armadura + Amuleto de Regeneración vs Orco brutal
+################################################################################
+================================================================================
+                         INICIO DEL COMBATE POR TURNOS                          
+================================================================================
+HÉROE   | Kael (base) + Espada + Armadura + Amuleto de Regeneración | HP:140/140 | ATK:35 | DEF:26 | VEL:10 | Estrategia: AtaqueEspada
+ENEMIGO | Orco brutal (base)                               | HP:130/130 | ATK:28 | DEF:12 | VEL: 8 | Estrategia: AtaqueGarrote
+--------------------------------------------------------------------------------
+Orden de iniciativa por velocidad: Kael ataca primero.
+--------------------------------------------------------------------------------
+[Turno 01] Kael             ejecuta "corte de espada"            -> 23 de daño | Orco brutal HP: 107/130
+[Turno 01] Orco brutal      ejecuta "golpe de garrote"           ->  6 de daño | Kael HP: 134/140
+[Turno 02] Kael             ejecuta "corte de espada"            -> 23 de daño | Orco brutal HP: 84/130
+   >>> [REGENERACIÓN] Kael recupera +2 HP mediante su amuleto -> HP actual: 136/140
+[Turno 02] Orco brutal      ejecuta "golpe de garrote"           ->  6 de daño | Kael HP: 130/140
+[Turno 03] Kael             ejecuta "corte de espada"            -> 23 de daño | Orco brutal HP: 61/130
+   >>> [REGENERACIÓN] Kael recupera +2 HP mediante su amuleto -> HP actual: 132/140
+[Turno 03] Orco brutal      ejecuta "golpe de garrote"           ->  6 de daño | Kael HP: 126/140
+[Turno 04] Kael             ejecuta "corte de espada"            -> 23 de daño | Orco brutal HP: 38/130
+   >>> [REGENERACIÓN] Kael recupera +2 HP mediante su amuleto -> HP actual: 128/140
+[Turno 04] Orco brutal      ejecuta "golpe de garrote"           ->  6 de daño | Kael HP: 122/140
+[Turno 05] Kael             ejecuta "corte de espada"            -> 23 de daño | Orco brutal HP: 15/130
+   >>> [REGENERACIÓN] Kael recupera +2 HP mediante su amuleto -> HP actual: 124/140
+[Turno 05] Orco brutal      ejecuta "golpe de garrote"           ->  6 de daño | Kael HP: 118/140
+[Turno 06] Kael             ejecuta "corte de espada"            -> 23 de daño | Orco brutal HP: 0/130
+   >>> [REGENERACIÓN] Kael recupera +2 HP mediante su amuleto -> HP actual: 120/140
+--------------------------------------------------------------------------------
+RESUMEN DEL COMBATE:
+  - Turnos transcurridos : 6
+  - Daño total acumulado : 168
+  - Golpes críticos      : 0
+  - HP total regenerado  : 10
+  - Estado del ganador   : Kael (base) + Espada + Armadura + Amuleto de Regeneración (HP 120/140)
+  - Estado del derrotado : Orco brutal (HP 0/130)
+********************************************************************************
+                 ¡VICTORIA PARA KAEL!
+********************************************************************************
+
+################################################################################
+CORRIDA 3: Sombra (Pícaro) + Espada + Veneno + Bendición vs Dragón ancestral
+################################################################################
+================================================================================
+                         INICIO DEL COMBATE POR TURNOS                          
+================================================================================
+HÉROE   | Sombra (base) + Espada + Veneno + Bendición      | HP:105/105 | ATK:47 | DEF:14 | VEL:25 | Estrategia: AtaquePunalada
+ENEMIGO | Dragón ancestral (base)                          | HP:180/180 | ATK:34 | DEF:18 | VEL:16 | Estrategia: AtaqueAlientoFuego
+--------------------------------------------------------------------------------
+Orden de iniciativa por velocidad: Sombra ataca primero.
+--------------------------------------------------------------------------------
+   >>> [¡CRÍTICO!] Sombra aprovecha su velocidad (25) para asestar un golpe letal sobre Dragón ancestral.
+[Turno 01] Sombra           ejecuta "puñalada furtiva + veneno"  -> 48 de daño [CRÍTICO] | Dragón ancestral HP: 132/180
+[Turno 01] Dragón ancestral ejecuta "aliento de fuego"           -> 27 de daño | Sombra HP: 78/105
+   >>> [¡CRÍTICO!] Sombra aprovecha su velocidad (25) para asestar un golpe letal sobre Dragón ancestral.
+[Turno 02] Sombra           ejecuta "puñalada furtiva + veneno"  -> 48 de daño [CRÍTICO] | Dragón ancestral HP: 84/180
+[Turno 02] Dragón ancestral ejecuta "aliento de fuego"           -> 27 de daño | Sombra HP: 51/105
+   >>> [¡CRÍTICO!] Sombra aprovecha su velocidad (25) para asestar un golpe letal sobre Dragón ancestral.
+[Turno 03] Sombra           ejecuta "puñalada furtiva + veneno"  -> 48 de daño [CRÍTICO] | Dragón ancestral HP: 36/180
+[Turno 03] Dragón ancestral ejecuta "aliento de fuego"           -> 27 de daño | Sombra HP: 24/105
+   >>> [¡CRÍTICO!] Sombra aprovecha su velocidad (25) para asestar un golpe letal sobre Dragón ancestral.
+[Turno 04] Sombra           ejecuta "puñalada furtiva + veneno"  -> 48 de daño [CRÍTICO] | Dragón ancestral HP: 0/180
+--------------------------------------------------------------------------------
+RESUMEN DEL COMBATE:
+  - Turnos transcurridos : 4
+  - Daño total acumulado : 273
+  - Golpes críticos      : 4
+  - HP total regenerado  : 0
+  - Estado del ganador   : Sombra (base) + Espada + Veneno + Bendición (HP 24/105)
+  - Estado del derrotado : Dragón ancestral (HP 0/180)
+********************************************************************************
+                 ¡VICTORIA PARA SOMBRA!
+********************************************************************************
+[INFO] BUILD SUCCESS
+\end{lstlisting}
+
+\end{document}

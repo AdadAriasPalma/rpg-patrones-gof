@@ -1,0 +1,25 @@
+# Maven / Java build outputs
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# NetBeans IDE temporary files
+nbproject/private/
+nbactions.xml
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+
+# OS / Editor files
+.DS_Store
+Thumbs.db

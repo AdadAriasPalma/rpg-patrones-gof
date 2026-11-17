@@ -1,0 +1,85 @@
+@startuml
+title Diagrama de Secuencia - Creación (Factory), Equipamiento (Decorator) y Turno de Combate (Strategy + Observer)
+
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor Usuario
+participant "Main" as Main
+participant "fabHeroe : CreadorPicaro" as FabHeroe
+participant "fabEnemigo : CreadorDragon" as FabEnemigo
+participant "sombraBase : PersonajeBase" as Base
+participant "espada : EspadaDecorator" as Espada
+participant "veneno : VenenoDecorator" as Veneno
+participant "sombra : BendicionDecorator" as Bendicion
+participant "estrategia : AtaquePunalada" as Estrategia
+participant "motor : MotorCombate" as Motor
+participant "bitacora : BitacoraCombate" as Bitacora
+
+== Fase 1: Creación mediante Factory Method ==
+Usuario -> Main : main(args)
+Main -> FabHeroe : crearPersonaje("Sombra")
+activate FabHeroe
+FabHeroe -> FabHeroe : validarNombre("Sombra")
+FabHeroe -> Base ** : new PersonajeBase("Sombra", 105, 26, 12, 22, AtaquePunalada)
+FabHeroe --> Main : sombraBase
+deactivate FabHeroe
+
+Main -> FabEnemigo : crearEnemigo()
+activate FabEnemigo
+FabEnemigo --> Main : dragon ("Dragón ancestral")
+deactivate FabEnemigo
+
+== Fase 2: Equipamiento Dinámico en Cadena (Decorator) ==
+Main -> Espada ** : new EspadaDecorator(sombraBase)
+Main -> Veneno ** : new VenenoDecorator(espada)
+Main -> Bendicion ** : new BendicionDecorator(veneno)
+
+== Fase 3: Registro de Observador e Inicio de Combate (Observer) ==
+Main -> Motor : agregarObservador(bitacora)
+Main -> Motor : iniciarCombate(sombra, dragon)
+activate Motor
+Motor -> Bitacora : onInicioCombate(sombra, dragon)
+activate Bitacora
+Bitacora --> Motor : imprime fichas iniciales e iniciativa
+deactivate Bitacora
+
+== Fase 4: Ejecución de Turno (Decorator + Strategy + Observer) ==
+loop mientras ambos personajes estén vivos
+    Motor -> Bendicion : atacar(dragon)
+    activate Bendicion
+    Bendicion -> Veneno : atacar(dragon)
+    activate Veneno
+    Veneno -> Espada : atacar(dragon)
+    activate Espada
+    Espada -> Base : getEstrategia()
+    Base --> Espada : estrategia
+    Espada -> Estrategia : atacar(sombra, dragon)
+    activate Estrategia
+    Estrategia -> Bendicion : getAtaque() / getVelocidad()
+    Bendicion --> Estrategia : ATK=47, VEL=25 (>=20 -> Crítico)
+    Estrategia --> Espada : ResultadoAtaque(43, true, "puñalada furtiva")
+    deactivate Estrategia
+    Espada --> Veneno : ResultadoAtaque(43, true, "puñalada furtiva")
+    deactivate Espada
+    Veneno --> Bendicion : ResultadoAtaque(48, true, "puñalada furtiva + veneno")
+    deactivate Veneno
+    Bendicion --> Motor : ResultadoAtaque(48, true, "puñalada furtiva + veneno")
+    deactivate Bendicion
+
+    Motor -> Motor : dragon.setHp(hp - 48)
+    Motor -> Bitacora : onGolpeCritico(sombra, dragon, resultado)
+    Motor -> Bitacora : onTurnoEjecutado(turno, sombra, dragon, resultado)
+    Motor -> Bendicion : regenerarPorTurno()
+    Bendicion --> Motor : 0 (sin amuleto)
+end
+
+Motor -> Bitacora : onFinCombate(sombra, dragon, totalTurnos)
+activate Bitacora
+Bitacora --> Motor : imprime resumen y banner ¡VICTORIA PARA SOMBRA!
+deactivate Bitacora
+
+Motor --> Main : ganador (sombra)
+deactivate Motor
+
+@enduml

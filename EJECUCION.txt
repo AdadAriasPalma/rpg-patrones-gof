@@ -1,0 +1,126 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------< com.rpg.gof:rpg-patrones-gof >--------------------
+[INFO] Building RPG Patrones GoF 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ rpg-patrones-gof ---
+[INFO] Deleting C:\Users\Adada\Desktop\UABC\Octavo_Semestre\AnalisisYDiseno\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ rpg-patrones-gof ---
+[INFO] skip non existing resourceDirectory C:\Users\Adada\Desktop\UABC\Octavo_Semestre\AnalisisYDiseno\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ rpg-patrones-gof ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 29 source files with javac [debug target 17] to target\classes
+[WARNING] location of system modules is not set in conjunction with -source 17
+  not setting the location of system modules may lead to class files that cannot run on JDK 17
+    --release 17 is recommended instead of -source 17 -target 17 because it sets the location of system modules automatically
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ rpg-patrones-gof ---
+
+################################################################################
+CORRIDA 1: Aria (Mago) + Espada + Veneno + Bendición vs Goblin salvaje
+################################################################################
+================================================================================
+                         INICIO DEL COMBATE POR TURNOS                          
+================================================================================
+HÉROE   | Aria (base) + Espada + Veneno + Bendición        | HP:100/100 | ATK:40 | DEF:12 | VEL:17 | Estrategia: AtaqueHechizo
+ENEMIGO | Goblin salvaje (base)                            | HP: 60/ 60 | ATK:13 | DEF: 2 | VEL:14 | Estrategia: AtaquePunalada
+--------------------------------------------------------------------------------
+Orden de iniciativa por velocidad: Aria ataca primero.
+--------------------------------------------------------------------------------
+[Turno 01] Aria             ejecuta "hechizo arcano + veneno"    -> 45 de daño | Goblin salvaje HP: 15/60
+[Turno 01] Goblin salvaje   ejecuta "puñalada furtiva"           ->  1 de daño | Aria HP: 99/100
+[Turno 02] Aria             ejecuta "hechizo arcano + veneno"    -> 45 de daño | Goblin salvaje HP: 0/60
+--------------------------------------------------------------------------------
+RESUMEN DEL COMBATE:
+  - Turnos transcurridos : 2
+  - Daño total acumulado : 91
+  - Golpes críticos      : 0
+  - HP total regenerado  : 0
+  - Estado del ganador   : Aria (base) + Espada + Veneno + Bendición (HP 99/100)
+  - Estado del derrotado : Goblin salvaje (HP 0/60)
+********************************************************************************
+                 ¡VICTORIA PARA ARIA!
+********************************************************************************
+
+################################################################################
+CORRIDA 2: Kael (Guerrero) + Espada + Armadura + Amuleto de Regeneración vs Orco brutal
+################################################################################
+================================================================================
+                         INICIO DEL COMBATE POR TURNOS                          
+================================================================================
+HÉROE   | Kael (base) + Espada + Armadura + Amuleto de Regeneración | HP:140/140 | ATK:35 | DEF:26 | VEL:10 | Estrategia: AtaqueEspada
+ENEMIGO | Orco brutal (base)                               | HP:130/130 | ATK:28 | DEF:12 | VEL: 8 | Estrategia: AtaqueGarrote
+--------------------------------------------------------------------------------
+Orden de iniciativa por velocidad: Kael ataca primero.
+--------------------------------------------------------------------------------
+[Turno 01] Kael             ejecuta "corte de espada"            -> 23 de daño | Orco brutal HP: 107/130
+[Turno 01] Orco brutal      ejecuta "golpe de garrote"           ->  6 de daño | Kael HP: 134/140
+[Turno 02] Kael             ejecuta "corte de espada"            -> 23 de daño | Orco brutal HP: 84/130
+   >>> [REGENERACIÓN] Kael recupera +2 HP mediante su amuleto -> HP actual: 136/140
+[Turno 02] Orco brutal      ejecuta "golpe de garrote"           ->  6 de daño | Kael HP: 130/140
+[Turno 03] Kael             ejecuta "corte de espada"            -> 23 de daño | Orco brutal HP: 61/130
+   >>> [REGENERACIÓN] Kael recupera +2 HP mediante su amuleto -> HP actual: 132/140
+[Turno 03] Orco brutal      ejecuta "golpe de garrote"           ->  6 de daño | Kael HP: 126/140
+[Turno 04] Kael             ejecuta "corte de espada"            -> 23 de daño | Orco brutal HP: 38/130
+   >>> [REGENERACIÓN] Kael recupera +2 HP mediante su amuleto -> HP actual: 128/140
+[Turno 04] Orco brutal      ejecuta "golpe de garrote"           ->  6 de daño | Kael HP: 122/140
+[Turno 05] Kael             ejecuta "corte de espada"            -> 23 de daño | Orco brutal HP: 15/130
+   >>> [REGENERACIÓN] Kael recupera +2 HP mediante su amuleto -> HP actual: 124/140
+[Turno 05] Orco brutal      ejecuta "golpe de garrote"           ->  6 de daño | Kael HP: 118/140
+[Turno 06] Kael             ejecuta "corte de espada"            -> 23 de daño | Orco brutal HP: 0/130
+   >>> [REGENERACIÓN] Kael recupera +2 HP mediante su amuleto -> HP actual: 120/140
+--------------------------------------------------------------------------------
+RESUMEN DEL COMBATE:
+  - Turnos transcurridos : 6
+  - Daño total acumulado : 168
+  - Golpes críticos      : 0
+  - HP total regenerado  : 10
+  - Estado del ganador   : Kael (base) + Espada + Armadura + Amuleto de Regeneración (HP 120/140)
+  - Estado del derrotado : Orco brutal (HP 0/130)
+********************************************************************************
+                 ¡VICTORIA PARA KAEL!
+********************************************************************************
+
+################################################################################
+CORRIDA 3: Sombra (Pícaro) + Espada + Veneno + Bendición vs Dragón ancestral
+################################################################################
+================================================================================
+                         INICIO DEL COMBATE POR TURNOS                          
+================================================================================
+HÉROE   | Sombra (base) + Espada + Veneno + Bendición      | HP:105/105 | ATK:47 | DEF:14 | VEL:25 | Estrategia: AtaquePunalada
+ENEMIGO | Dragón ancestral (base)                          | HP:180/180 | ATK:34 | DEF:18 | VEL:16 | Estrategia: AtaqueAlientoFuego
+--------------------------------------------------------------------------------
+Orden de iniciativa por velocidad: Sombra ataca primero.
+--------------------------------------------------------------------------------
+   >>> [¡CRÍTICO!] Sombra aprovecha su velocidad (25) para asestar un golpe letal sobre Dragón ancestral.
+[Turno 01] Sombra           ejecuta "puñalada furtiva + veneno"  -> 48 de daño [CRÍTICO] | Dragón ancestral HP: 132/180
+[Turno 01] Dragón ancestral ejecuta "aliento de fuego"           -> 27 de daño | Sombra HP: 78/105
+   >>> [¡CRÍTICO!] Sombra aprovecha su velocidad (25) para asestar un golpe letal sobre Dragón ancestral.
+[Turno 02] Sombra           ejecuta "puñalada furtiva + veneno"  -> 48 de daño [CRÍTICO] | Dragón ancestral HP: 84/180
+[Turno 02] Dragón ancestral ejecuta "aliento de fuego"           -> 27 de daño | Sombra HP: 51/105
+   >>> [¡CRÍTICO!] Sombra aprovecha su velocidad (25) para asestar un golpe letal sobre Dragón ancestral.
+[Turno 03] Sombra           ejecuta "puñalada furtiva + veneno"  -> 48 de daño [CRÍTICO] | Dragón ancestral HP: 36/180
+[Turno 03] Dragón ancestral ejecuta "aliento de fuego"           -> 27 de daño | Sombra HP: 24/105
+   >>> [¡CRÍTICO!] Sombra aprovecha su velocidad (25) para asestar un golpe letal sobre Dragón ancestral.
+[Turno 04] Sombra           ejecuta "puñalada furtiva + veneno"  -> 48 de daño [CRÍTICO] | Dragón ancestral HP: 0/180
+--------------------------------------------------------------------------------
+RESUMEN DEL COMBATE:
+  - Turnos transcurridos : 4
+  - Daño total acumulado : 273
+  - Golpes críticos      : 4
+  - HP total regenerado  : 0
+  - Estado del ganador   : Sombra (base) + Espada + Veneno + Bendición (HP 24/105)
+  - Estado del derrotado : Dragón ancestral (HP 0/180)
+********************************************************************************
+                 ¡VICTORIA PARA SOMBRA!
+********************************************************************************
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.499 s
+[INFO] Finished at: 2026-11-17T11:14:58-08:00
+[INFO] ------------------------------------------------------------------------
